@@ -21,7 +21,7 @@ let bookmarkArr = JSON.parse(localStorage.getItem("movies")) || [];
 
 //ServerFetching
 
-const fetchingMovies = async (movieTitle, movieType = "movie") => {
+const fetchingMovies = async (movieTitle = "hulk", movieType = "movie") => {
    try{
     let response = await fetch(`https://omdbapi.com/?apikey=a75504ec&s=${movieTitle}&page=${page}&type=${movieType}`)
     let data = await response.json()
