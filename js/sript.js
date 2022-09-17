@@ -95,6 +95,10 @@ elForm.addEventListener("submit", evt => {
 
 elBtns[0].addEventListener("click", () => {
     if(page > 1) {
+
+        elList.innerHTML = null;
+        elLader.classList.remove("d-none")
+
         page--
         elPage.textContent = page
         fetchingMovies(movieTitle, elSelect.value);
@@ -103,6 +107,9 @@ elBtns[0].addEventListener("click", () => {
 
 elBtns[2].addEventListener("click", () => {
     if(page) {
+        elList.innerHTML = null;
+        elLader.classList.remove("d-none")
+
         page++
         elPage.textContent = page
         fetchingMovies(movieTitle, elSelect.value);
