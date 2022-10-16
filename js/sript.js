@@ -11,11 +11,14 @@ let elBookmark = document.querySelector(".bookmark");
 let elBookmarkOppen = document.querySelector(".bookmark-oppen");
 let elBookmarkClouse = document.querySelector(".bookmark-clouse");
 let elBookmarkList = document.querySelector(".bookmark-list");
+let bookmarkLength = document.querySelector(".js-bookmarkLength")
 
 let elLader = document.querySelector(".js-loader");
 
 let page = 1;
 let movieTitle = "hulk";
+
+let moviesClone = null;
 
 let bookmarkArr = JSON.parse(localStorage.getItem("movies")) || [];
 
@@ -33,19 +36,7 @@ const fetchingMovies = async (movieTitle = "hulk", movieType = "movie") => {
    }
 }
 
-const fetchingMovie = async (movieImdbId) => {
-    try{
-     let response = await fetch(`https://omdbapi.com/?apikey=a75504ec&i=${movieImdbId}`)
-     let data = await response.json()
-     bookmarkAddMovie(data);
-    }catch (e) {
-     console.log(e.message);
-    }
-}
-
 fetchingMovies(movieTitle)
-
-//ListRender
 
 const createItem = (movie) => {
     let elItem = elTemplate.cloneNode(true);
@@ -62,7 +53,8 @@ const createItem = (movie) => {
 
 function rendringList (movies) {
     elList.innerHTML = null;
-    
+    moviesClone = [...movies]
+
     modalRender(movies)
     let wrapperList = document.createDocumentFragment();
 
@@ -136,25 +128,28 @@ function modalRender (movies) {
 
 //BookMark
 
+elList.addEventListener("click", bookmarkAddMovie) 
 
-elList.addEventListener("click", (evt) => {
+function bookmarkAddMovie (evt) {
     if(evt.target.matches(".js-bookmark")) {
         let movieId = evt.target.dataset.imdbID;
+        let index = bookmarkArr.findIndex(movie => movie.imdbID === movieId)
+        console.log(index);
+        if(index < 0) {
+            let findMovie = moviesClone.find(movie => movie.imdbID === movieId)
+            bookmarkArr.push(findMovie);
+        }
 
-        fetchingMovie(movieId)
+        bookmarkLength.textContent = bookmarkArr.length
+        bookmarkListRender()
+        localStorage.setItem("movies", JSON.stringify(bookmarkArr))
     }
-}) 
-
-function bookmarkAddMovie (movie) {
-    bookmarkArr.push(movie);
-    bookmarkListRender(bookmarkArr)
-    localStorage.setItem("movies", JSON.stringify(bookmarkArr))
 }                               
 
-function bookmarkListRender (bookMovies) {
+function bookmarkListRender () {
     elBookmarkList.innerHTML = null;
 
-    bookMovies.forEach(bookMovie => {
+    bookmarkArr.forEach(bookMovie => {
         elBookmarkList.innerHTML += `
             <li class="col-12 col-sm-6 px-0">
                 <div class="card mx-auto d-flex flex-column justify-content-between" style="width: 200px; min-height:280px">
@@ -167,7 +162,7 @@ function bookmarkListRender (bookMovies) {
     })
 }
 
-bookmarkListRender(bookmarkArr)
+bookmarkListRender()
 
 function bookmarkRemoveMovie () {
    elBookmarkList.addEventListener("click",evt => {
@@ -177,6 +172,7 @@ function bookmarkRemoveMovie () {
        let movieIndex =  bookmarkArr.findIndex(movie => movie.imdbID == movieId)
        bookmarkArr.splice(movieIndex,1)
 
+       bookmarkLength.textContent = bookmarkArr.length
        bookmarkListRender(bookmarkArr)
        localStorage.setItem("movies", JSON.stringify(bookmarkArr))
     }
@@ -185,12 +181,13 @@ function bookmarkRemoveMovie () {
 
 bookmarkRemoveMovie()
 
-
-elBookmarkOppen.addEventListener("click", () => {
-    elBookmark.style.right = "0"
-    document.body.style.backgroundColor = "#000"
+elBookmarkOppen.addEventListener("click", (e) => {
+    elBookmark.classList.add("active")
+    e.stopPropagation()
 })    
 
-elBookmarkClouse.addEventListener("click", () => {
-    elBookmark.style.right = "-500px"
+elBookmarkClouse.addEventListener("click", (e) => {
+    elBookmark.classList.remove("active")
 })  
+
+bookmarkLength.textContent = bookmarkArr.length
